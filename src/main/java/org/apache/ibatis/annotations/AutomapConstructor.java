@@ -45,12 +45,13 @@ import java.lang.annotation.Target;
  *   // ...
  * }
  * </pre>
+ * 有意思，找了很久的如何让注解不去掉空格的方法居然在这儿
  *
  * @author Tim Chen
  * @since 3.4.3
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.CONSTRUCTOR })
+@Target({ElementType.CONSTRUCTOR})
 public @interface AutomapConstructor {
 }

@@ -31,6 +31,9 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+/**
+ * sqlSessionFactory:创建sqlSession，内部管理着一个configuration
+ */
 class AutoConstructorTest {
   private static SqlSessionFactory sqlSessionFactory;
 
@@ -38,12 +41,14 @@ class AutoConstructorTest {
   static void setUp() throws Exception {
     // create a SqlSessionFactory
     try (Reader reader = Resources.getResourceAsReader("org/apache/ibatis/autoconstructor/mybatis-config.xml")) {
+
+      //manage a myBatis configuration
       sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
     }
 
     // populate in-memory database
     BaseDataTest.runScript(sqlSessionFactory.getConfiguration().getEnvironment().getDataSource(),
-        "org/apache/ibatis/autoconstructor/CreateDB.sql");
+      "org/apache/ibatis/autoconstructor/CreateDB.sql");
   }
 
   @Test
