@@ -26,6 +26,8 @@ import org.apache.ibatis.executor.BatchResult;
  * The primary Java interface for working with MyBatis.
  * Through this interface you can execute commands, get mappers and manage transactions.
  *
+ * 最基础的sql执行接口，调用接口方法，可进行sql命令执行，获取映射、管理事务等
+ *
  * @author Clinton Begin
  */
 public interface SqlSession extends Closeable {

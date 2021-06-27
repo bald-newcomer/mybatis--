@@ -127,6 +127,7 @@ public abstract class BaseExecutor implements Executor {
     return doFlushStatements(isRollBack);
   }
 
+  /***/
   @Override
   public <E> List<E> query(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler) throws SQLException {
     BoundSql boundSql = ms.getBoundSql(parameter);
