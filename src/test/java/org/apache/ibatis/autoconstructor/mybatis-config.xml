@@ -22,22 +22,6 @@
 
 <configuration>
 
-  <!-- autoMappingBehavior should be set in each test case -->
-
-  <!--  <properties resource="" url="">-->
-
-
-  <!--    <property name="" value="" />-->
-  <!--    <property name="" value=""/>-->
-
-  <!--  </properties>-->
-
-  <typeAliases>
-    <!--    <package name="org.apache.ibatis"/>-->
-    <typeAlias type="" alias=""/>
-  </typeAliases>
-
-
   <environments default="development">
     <environment id="development">
       <transactionManager type="JDBC">
