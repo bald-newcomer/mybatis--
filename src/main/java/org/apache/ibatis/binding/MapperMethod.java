@@ -109,11 +109,8 @@ public class MapperMethod {
           //否则就是查询单个对象
           Object param = method.convertArgsToSqlCommandParam(args);
           result = sqlSession.selectOne(command.getName(), param);
-<<<<<<< HEAD
           //返回值类型为Optional
-=======
           //返回值为Optional时候，sqlSession.selectOne查询的结果是真实类型，并不会包装为Optional，此处，将其外面多包装一层Optional
->>>>>>> 120f3a210d4c9760cafef5d6591ad78fd2bdef1f
           if (method.returnsOptional()
             //非空判断，赋值给result，解决null值判断问题，使用Optional类可以避免显式的null值判断
             && (result == null || !method.getReturnType().equals(result.getClass()))) {
