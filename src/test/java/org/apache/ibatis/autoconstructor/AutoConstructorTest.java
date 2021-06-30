@@ -43,6 +43,7 @@ class AutoConstructorTest {
     try (Reader reader = Resources.getResourceAsReader("org/apache/ibatis/autoconstructor/mybatis-config.xml")) {
 
       //manage a myBatis configuration
+      //建立sqlSessionFactory，读取xml配置文件存入配置，生命周期内有效
       sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
     }
 
@@ -51,10 +52,23 @@ class AutoConstructorTest {
       "org/apache/ibatis/autoconstructor/CreateDB.sql");
   }
 
+  /**
+   * sqlSession.getMapper()
+   * 使用 SqlSession 创建相关接口的代理对象
+   *
+   * 获取对应mapper过程(该过程使用了动态代理)
+   * Mapper接口被到注册到了MapperRegistry中，放在其名为knowMappers 的HashMap属性中
+   * 在MapperRegistry类的addMapper()方法中，knownMappers.put(type, new MapperProxyFactory<T>(type));
+   * 相当于把：诸如BlogMapper 之类的Mapper接口被添加到了MapperRegistry 中的一个HashMap中。并以 Mapper 接口的 Class 对象作为 Key
+   * 以一个携带Mapper接口作为属性的MapperProxyFactory 实例作为value
+   */
   @Test
   void fullyPopulatedSubject() {
+    //通过sqlSessionFactory.openSession()，创建Sqlsession
+    //Sqlsession对应着一次数据库会话，可以执行多次sql，当一旦关闭了Sqlsession就需要重新创建它
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       final AutoConstructorMapper mapper = sqlSession.getMapper(AutoConstructorMapper.class);
+      //根据条件查询获取数据库数据
       final Object subject = mapper.getSubject(1);
       assertNotNull(subject);
     }
@@ -62,9 +76,12 @@ class AutoConstructorTest {
 
   @Test
   void primitiveSubjects() {
+
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       final AutoConstructorMapper mapper = sqlSession.getMapper(AutoConstructorMapper.class);
       assertThrows(PersistenceException.class, mapper::getSubjects);
+      //System.out.println(PersistenceException.class);
+      //System.out.println(mapper.getSubjects());
     }
   }
 

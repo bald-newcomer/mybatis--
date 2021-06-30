@@ -28,6 +28,11 @@ import org.apache.ibatis.session.SqlSession;
  */
 public class MapperProxyFactory<T> {
 
+  /**
+   * 动态代理对接口的绑定
+   * 作用就是生成动态代理对象。而代理的方法则被放到了MapperProxy类
+   */
+
   private final Class<T> mapperInterface;
   private final Map<Method, MapperMethodInvoker> methodCache = new ConcurrentHashMap<>();
 

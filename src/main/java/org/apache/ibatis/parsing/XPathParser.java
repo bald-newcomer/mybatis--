@@ -230,6 +230,7 @@ public class XPathParser {
   private Document createDocument(InputSource inputSource) {
     // important: this must only be called AFTER common constructor
     try {
+      //调用 DocumentBuilderFactory.newInstance() 方法得到创建 DOM 解析器的工厂
       DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
       factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
       factory.setValidating(validation);
@@ -240,6 +241,7 @@ public class XPathParser {
       factory.setCoalescing(false);
       factory.setExpandEntityReferences(true);
 
+      //调用工厂对象的 newDocumentBuilder方法得到 DOM 解析器对象
       DocumentBuilder builder = factory.newDocumentBuilder();
       builder.setEntityResolver(entityResolver);
       builder.setErrorHandler(new ErrorHandler() {
@@ -258,6 +260,8 @@ public class XPathParser {
           // NOP
         }
       });
+      //调用 DOM 解析器对象的 parse() 方法解析 XML 文档，得到代表整个文档的 Document 对象，进行可以利用DOM特性对整个XML文档进行操作了。
+      //把要解析的 XML 文档转化为输入流，以便 DOM 解析器解析它
       return builder.parse(inputSource);
     } catch (Exception e) {
       throw new BuilderException("Error creating document instance.  Cause: " + e, e);

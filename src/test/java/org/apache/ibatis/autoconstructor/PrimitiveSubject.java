@@ -15,6 +15,8 @@
  */
 package org.apache.ibatis.autoconstructor;
 
+import org.apache.ibatis.annotations.AutomapConstructor;
+
 import java.util.Date;
 
 public class PrimitiveSubject {
@@ -35,4 +37,8 @@ public class PrimitiveSubject {
     this.active = active;
     this.dt = dt;
   }
+
+
+
+
 }

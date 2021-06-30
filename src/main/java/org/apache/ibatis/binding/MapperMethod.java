@@ -44,49 +44,69 @@ import org.apache.ibatis.session.SqlSession;
  * @author Lasse Voss
  * @author Kazuki Shimizu
  */
+//这个类是整个代理机制的核心类，对Sqlsession当中的操作进行了封装
 public class MapperMethod {
-
+  //一个内部封装 封装了SQL标签的类型 insert update delete select
   private final SqlCommand command;
+  //一个内部类 封装了方法的参数信息 返回类型信息等
   private final MethodSignature method;
 
+  //构造参数
   public MapperMethod(Class<?> mapperInterface, Method method, Configuration config) {
     this.command = new SqlCommand(config, mapperInterface, method);
     this.method = new MethodSignature(config, mapperInterface, method);
   }
 
+  //这个方法是对SqlSession的包装调用
   public Object execute(SqlSession sqlSession, Object[] args) {
+    //定义返回结果
     Object result;
+    //如果是INSERT操作
     switch (command.getType()) {
       case INSERT: {
+        //处理参数
         Object param = method.convertArgsToSqlCommandParam(args);
+        //调用sqlSession的insert方法
         result = rowCountResult(sqlSession.insert(command.getName(), param));
         break;
       }
+      //如果是UPDATE操作 同上
       case UPDATE: {
         Object param = method.convertArgsToSqlCommandParam(args);
         result = rowCountResult(sqlSession.update(command.getName(), param));
         break;
       }
+      //如果是DELETE操作 同上
       case DELETE: {
         Object param = method.convertArgsToSqlCommandParam(args);
         result = rowCountResult(sqlSession.delete(command.getName(), param));
         break;
       }
+      //如果是SELECT操作 那么情况会多一些 但是也都和sqlSession的查询方法一一对应
       case SELECT:
+        //如果返回void 并且参数有resultHandler
         if (method.returnsVoid() && method.hasResultHandler()) {
+          //则调用 void select(String statement, Object parameter, ResultHandler handler);方法
           executeWithResultHandler(sqlSession, args);
           result = null;
+          //如果返回多行结果，调用 <E> List<E> selectList(String statement, Object parameter);
+          //executeForMany这个方法调用的
         } else if (method.returnsMany()) {
           result = executeForMany(sqlSession, args);
+          //如果返回类型是MAP 则调用executeForMap方法
         } else if (method.returnsMap()) {
           result = executeForMap(sqlSession, args);
+          //如果返回类型Cursor，则调用executeForCursor方法（判断是否为游标查询）
         } else if (method.returnsCursor()) {
           result = executeForCursor(sqlSession, args);
         } else {
+          //否则就是查询单个对象
           Object param = method.convertArgsToSqlCommandParam(args);
           result = sqlSession.selectOne(command.getName(), param);
+          //返回值类型为Optional
           if (method.returnsOptional()
               && (result == null || !method.getReturnType().equals(result.getClass()))) {
+            //非空判断，赋值给result，解决null值判断问题，使用Optional类可以避免显式的null值判断
             result = Optional.ofNullable(result);
           }
         }
@@ -95,9 +115,11 @@ public class MapperMethod {
         result = sqlSession.flushStatements();
         break;
       default:
+        //如果全都不匹配 说明mapper中定义的方法不对
         throw new BindingException("Unknown execution method for: " + command.getName());
     }
     if (result == null && method.getReturnType().isPrimitive() && !method.returnsVoid()) {
+      //如果返回值为空 并且方法返回值类型是基础类型 并且不是VOID 则抛出异常
       throw new BindingException("Mapper method '" + command.getName()
           + " attempted to return null from a method with a primitive return type (" + method.getReturnType() + ").");
     }
@@ -219,10 +241,12 @@ public class MapperMethod {
   public static class SqlCommand {
 
     private final String name;
-    private final SqlCommandType type;
+    private final SqlCommandType type; //UNKNOWN, INSERT, UPDATE, DELETE, SELECT, FLUSH
 
     public SqlCommand(Configuration configuration, Class<?> mapperInterface, Method method) {
       final String methodName = method.getName();
+      //该方法返回一个Class对象，返回当前class对象的声明对象class,
+      //一般针对内部类的情况，比如A类有内部类B，那么通过B.class.getDeclaringClass()方法将获取到A的Class对象.
       final Class<?> declaringClass = method.getDeclaringClass();
       MappedStatement ms = resolveMappedStatement(mapperInterface, methodName, declaringClass,
           configuration);
@@ -274,16 +298,16 @@ public class MapperMethod {
 
   public static class MethodSignature {
 
-    private final boolean returnsMany;
-    private final boolean returnsMap;
-    private final boolean returnsVoid;
-    private final boolean returnsCursor;
+    private final boolean returnsMany;//是否多值查询
+    private final boolean returnsMap;//是否map查询
+    private final boolean returnsVoid;//是否void查询
+    private final boolean returnsCursor;//是否游标查询
     private final boolean returnsOptional;
-    private final Class<?> returnType;
-    private final String mapKey;
+    private final Class<?> returnType;//返回类型
+    private final String mapKey;//获取mapKey的值
     private final Integer resultHandlerIndex;
     private final Integer rowBoundsIndex;
-    private final ParamNameResolver paramNameResolver;
+    private final ParamNameResolver paramNameResolver;//参数解析器
 
     public MethodSignature(Configuration configuration, Class<?> mapperInterface, Method method) {
       Type resolvedReturnType = TypeParameterResolver.resolveReturnType(method, mapperInterface);
