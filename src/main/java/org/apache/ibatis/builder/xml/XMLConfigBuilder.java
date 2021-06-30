@@ -103,17 +103,8 @@ public class XMLConfigBuilder extends BaseBuilder {
   /**
    * 解析配置文件，配置文件的种类如下
    * <p>
-   * properties
-   * settings
-   * typeAliases
-   * plugins
-   * objectFactory
-   * objectWrapperFactory
-   * reflectorFactory
-   * environments
-   * databaseIdProvider
-   * typeHandlers
-   * mappers
+   * <p>
+   * 这里只做了配置文件的加载，但是并没有做很多的初始化
    */
   private void parseConfiguration(XNode root) {
     try {
@@ -126,16 +117,21 @@ public class XMLConfigBuilder extends BaseBuilder {
       loadCustomLogImpl(settings);
       //加载类型取别名，解析包路径或者注册别名
       typeAliasesElement(root.evalNode("typeAliases"));
-      //插件
+      //插件，就是拦截器
       pluginElement(root.evalNode("plugins"));
+      //对象工厂
       objectFactoryElement(root.evalNode("objectFactory"));
       objectWrapperFactoryElement(root.evalNode("objectWrapperFactory"));
       reflectorFactoryElement(root.evalNode("reflectorFactory"));
       settingsElement(settings);
       // read it after objectFactory and objectWrapperFactory issue #631
+      //环境，连接池等
       environmentsElement(root.evalNode("environments"));
+      //多数据源支持，但是好像是不支持运行时的多数据源切换，只能通过不同的mapper文件中的databaseId,选择不同的database
       databaseIdProviderElement(root.evalNode("databaseIdProvider"));
+      //类型处理器，返回值类型处理器
       typeHandlerElement(root.evalNode("typeHandlers"));
+      //mapper映射文件
       mapperElement(root.evalNode("mappers"));
     } catch (Exception e) {
       throw new BuilderException("Error parsing SQL Mapper Configuration. Cause: " + e, e);
@@ -207,7 +203,10 @@ public class XMLConfigBuilder extends BaseBuilder {
       for (XNode child : parent.getChildren()) {
         String interceptor = child.getStringAttribute("interceptor");
         Properties properties = child.getChildrenAsProperties();
+        //解析interceptor别名，首先从typeAlias中获取类对象，没有就自己映射
+        //类对象 --> 对象
         Interceptor interceptorInstance = (Interceptor) resolveClass(interceptor).getDeclaredConstructor().newInstance();
+        //设置拦截器属性，存入configuration
         interceptorInstance.setProperties(properties);
         configuration.addInterceptor(interceptorInstance);
       }
@@ -303,9 +302,12 @@ public class XMLConfigBuilder extends BaseBuilder {
       for (XNode child : context.getChildren()) {
         String id = child.getStringAttribute("id");
         if (isSpecifiedEnvironment(id)) {
+          //一般用JdbcTransactionFactory
           TransactionFactory txFactory = transactionManagerElement(child.evalNode("transactionManager"));
+          //连接池工厂
           DataSourceFactory dsFactory = dataSourceElement(child.evalNode("dataSource"));
           DataSource dataSource = dsFactory.getDataSource();
+          //最后组装环境
           Environment.Builder environmentBuilder = new Environment.Builder(id)
             .transactionFactory(txFactory)
             .dataSource(dataSource);
