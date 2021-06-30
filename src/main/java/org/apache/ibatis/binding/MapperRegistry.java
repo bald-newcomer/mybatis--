@@ -30,6 +30,10 @@ import org.apache.ibatis.session.SqlSession;
  * @author Clinton Begin
  * @author Eduardo Macarron
  * @author Lasse Voss
+ * <p>
+ * Mapper注册器，维护了一个配置文件和所有的类和mapper代理工厂
+ * <p>
+ * 新增可以通过包路径批量添加mapper
  */
 public class MapperRegistry {
 
@@ -40,6 +44,10 @@ public class MapperRegistry {
     this.config = config;
   }
 
+  /**
+   * @param type       mapper接口
+   * @param sqlSession 里面有初始化的configuration 信息
+   */
   @SuppressWarnings("unchecked")
   public <T> T getMapper(Class<T> type, SqlSession sqlSession) {
     final MapperProxyFactory<T> mapperProxyFactory = (MapperProxyFactory<T>) knownMappers.get(type);
@@ -47,6 +55,7 @@ public class MapperRegistry {
       throw new BindingException("Type " + type + " is not known to the MapperRegistry.");
     }
     try {
+      //jdk动态代理，组装mapper接口和mapper.xml文件 返回相应的对象
       return mapperProxyFactory.newInstance(sqlSession);
     } catch (Exception e) {
       throw new BindingException("Error getting mapper instance. Cause: " + e, e);
@@ -64,14 +73,17 @@ public class MapperRegistry {
       }
       boolean loadCompleted = false;
       try {
+        //put就是一个简单的创建，所以他的实现就在MapperProxyFactory的构造方法中
         knownMappers.put(type, new MapperProxyFactory<>(type));
         // It's important that the type is added before the parser is run
         // otherwise the binding may automatically be attempted by the
         // mapper parser. If the type is already known, it won't try.
+        //todo 这个是做了对应的注解的一些操作，之后再看
         MapperAnnotationBuilder parser = new MapperAnnotationBuilder(config, type);
         parser.parse();
         loadCompleted = true;
       } finally {
+        //这个算一个标记，可以学习
         if (!loadCompleted) {
           knownMappers.remove(type);
         }
@@ -92,10 +104,8 @@ public class MapperRegistry {
   /**
    * Adds the mappers.
    *
-   * @param packageName
-   *          the package name
-   * @param superType
-   *          the super type
+   * @param packageName the package name
+   * @param superType   the super type
    * @since 3.2.2
    */
   public void addMappers(String packageName, Class<?> superType) {
@@ -110,10 +120,11 @@ public class MapperRegistry {
   /**
    * Adds the mappers.
    *
-   * @param packageName
-   *          the package name
+   * @param packageName the package name
    * @since 3.2.2
+   * 我们可以通过包路径天际configuration中的mapper文件，有点意思
    */
+
   public void addMappers(String packageName) {
     addMappers(packageName, Object.class);
   }
