@@ -107,6 +107,7 @@ public class TypeAliasRegistry {
       if (string == null) {
         return null;
       }
+      //所以不区分大小写
       // issue #748
       String key = string.toLowerCase(Locale.ENGLISH);
       Class<T> value;

@@ -89,6 +89,7 @@ public class MapperMethod {
         } else {
           Object param = method.convertArgsToSqlCommandParam(args);
           result = sqlSession.selectOne(command.getName(), param);
+          //返回值为Optional时候，sqlSession.selectOne查询的结果是真实类型，并不会包装为Optional，此处，将其外面多包装一层Optional
           if (method.returnsOptional()
             && (result == null || !method.getReturnType().equals(result.getClass()))) {
             result = Optional.ofNullable(result);
