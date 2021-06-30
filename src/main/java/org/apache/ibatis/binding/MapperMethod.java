@@ -49,11 +49,15 @@ public class MapperMethod {
   private final SqlCommand command;
   private final MethodSignature method;
 
+  //构造方法是最后的初始化，是对proxy的增强，封装excete最终需要的SqlCommand、MethodSignature
   public MapperMethod(Class<?> mapperInterface, Method method, Configuration config) {
+    //sql指令，方法名和方法类型
     this.command = new SqlCommand(config, mapperInterface, method);
+    //method，代理被执行的方法签名
     this.method = new MethodSignature(config, mapperInterface, method);
   }
 
+  //此方法是本质的sql执行方法，todo PersistenceException的报错应该是在这里面进行结果值转型时报错
   public Object execute(SqlSession sqlSession, Object[] args) {
     Object result;
     switch (command.getType()) {
@@ -86,7 +90,7 @@ public class MapperMethod {
           Object param = method.convertArgsToSqlCommandParam(args);
           result = sqlSession.selectOne(command.getName(), param);
           if (method.returnsOptional()
-              && (result == null || !method.getReturnType().equals(result.getClass()))) {
+            && (result == null || !method.getReturnType().equals(result.getClass()))) {
             result = Optional.ofNullable(result);
           }
         }
@@ -99,7 +103,7 @@ public class MapperMethod {
     }
     if (result == null && method.getReturnType().isPrimitive() && !method.returnsVoid()) {
       throw new BindingException("Mapper method '" + command.getName()
-          + " attempted to return null from a method with a primitive return type (" + method.getReturnType() + ").");
+        + " attempted to return null from a method with a primitive return type (" + method.getReturnType() + ").");
     }
     return result;
   }
@@ -123,10 +127,10 @@ public class MapperMethod {
   private void executeWithResultHandler(SqlSession sqlSession, Object[] args) {
     MappedStatement ms = sqlSession.getConfiguration().getMappedStatement(command.getName());
     if (!StatementType.CALLABLE.equals(ms.getStatementType())
-        && void.class.equals(ms.getResultMaps().get(0).getType())) {
+      && void.class.equals(ms.getResultMaps().get(0).getType())) {
       throw new BindingException("method " + command.getName()
-          + " needs either a @ResultMap annotation, a @ResultType annotation,"
-          + " or a resultType attribute in XML so a ResultHandler can be used as a parameter.");
+        + " needs either a @ResultMap annotation, a @ResultType annotation,"
+        + " or a resultType attribute in XML so a ResultHandler can be used as a parameter.");
     }
     Object param = method.convertArgsToSqlCommandParam(args);
     if (method.hasRowBounds()) {
@@ -139,6 +143,7 @@ public class MapperMethod {
 
   private <E> Object executeForMany(SqlSession sqlSession, Object[] args) {
     List<E> result;
+    //没有参数，也没有分页信息
     Object param = method.convertArgsToSqlCommandParam(args);
     if (method.hasRowBounds()) {
       RowBounds rowBounds = method.extractRowBounds(args);
@@ -222,17 +227,18 @@ public class MapperMethod {
     private final SqlCommandType type;
 
     public SqlCommand(Configuration configuration, Class<?> mapperInterface, Method method) {
+      //接口名+方法名 --> statementName
       final String methodName = method.getName();
       final Class<?> declaringClass = method.getDeclaringClass();
       MappedStatement ms = resolveMappedStatement(mapperInterface, methodName, declaringClass,
-          configuration);
+        configuration);
       if (ms == null) {
         if (method.getAnnotation(Flush.class) != null) {
           name = null;
           type = SqlCommandType.FLUSH;
         } else {
           throw new BindingException("Invalid bound statement (not found): "
-              + mapperInterface.getName() + "." + methodName);
+            + mapperInterface.getName() + "." + methodName);
         }
       } else {
         name = ms.getId();
@@ -252,7 +258,7 @@ public class MapperMethod {
     }
 
     private MappedStatement resolveMappedStatement(Class<?> mapperInterface, String methodName,
-        Class<?> declaringClass, Configuration configuration) {
+                                                   Class<?> declaringClass, Configuration configuration) {
       String statementId = mapperInterface.getName() + "." + methodName;
       if (configuration.hasStatement(statementId)) {
         return configuration.getMappedStatement(statementId);
@@ -262,7 +268,7 @@ public class MapperMethod {
       for (Class<?> superInterface : mapperInterface.getInterfaces()) {
         if (declaringClass.isAssignableFrom(superInterface)) {
           MappedStatement ms = resolveMappedStatement(superInterface, methodName,
-              declaringClass, configuration);
+            declaringClass, configuration);
           if (ms != null) {
             return ms;
           }
@@ -287,6 +293,7 @@ public class MapperMethod {
 
     public MethodSignature(Configuration configuration, Class<?> mapperInterface, Method method) {
       Type resolvedReturnType = TypeParameterResolver.resolveReturnType(method, mapperInterface);
+      //返回值
       if (resolvedReturnType instanceof Class<?>) {
         this.returnType = (Class<?>) resolvedReturnType;
       } else if (resolvedReturnType instanceof ParameterizedType) {
@@ -295,12 +302,17 @@ public class MapperMethod {
         this.returnType = method.getReturnType();
       }
       this.returnsVoid = void.class.equals(this.returnType);
+
       this.returnsMany = configuration.getObjectFactory().isCollection(this.returnType) || this.returnType.isArray();
       this.returnsCursor = Cursor.class.equals(this.returnType);
       this.returnsOptional = Optional.class.equals(this.returnType);
+
+      //返回值为map类型时，从MapKey注解中获取key值
       this.mapKey = getMapKey(method);
       this.returnsMap = this.mapKey != null;
+      //从Method中获取RowBounds类型的参数，这个是和分页相关的信息，返回参数的位置是第几个
       this.rowBoundsIndex = getUniqueParamIndex(method, RowBounds.class);
+      //结果处理参数的标记位置 结果处理器此处不表，会看很久  todo ResultHandler
       this.resultHandlerIndex = getUniqueParamIndex(method, ResultHandler.class);
       this.paramNameResolver = new ParamNameResolver(configuration, method);
     }
@@ -355,6 +367,7 @@ public class MapperMethod {
       return returnsOptional;
     }
 
+    //从Method中，获取参数类型为 paramType 的参数，这里只记录是第几个参数
     private Integer getUniqueParamIndex(Method method, Class<?> paramType) {
       Integer index = null;
       final Class<?>[] argTypes = method.getParameterTypes();

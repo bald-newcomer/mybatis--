@@ -15,12 +15,6 @@
  */
 package org.apache.ibatis.autoconstructor;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
-import java.io.Reader;
-import java.util.List;
-
 import org.apache.ibatis.BaseDataTest;
 import org.apache.ibatis.exceptions.PersistenceException;
 import org.apache.ibatis.io.Resources;
@@ -30,6 +24,12 @@ import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+
+import java.io.Reader;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * sqlSessionFactory:创建sqlSession，内部管理着一个configuration
@@ -60,6 +60,14 @@ class AutoConstructorTest {
     }
   }
 
+
+  /**
+   * 报错信息：
+   * PrimitiveSubject with invalid types (int,String,int,int,int,boolean,Date) or values (2,b,10,null,45,true,Wed Jun 30 01:27:53 CST 2021).
+   * <p>
+   * 参数 null 不能赋值给 int类型，所以要用包装类
+   * <p>
+   */
   @Test
   void primitiveSubjects() {
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
