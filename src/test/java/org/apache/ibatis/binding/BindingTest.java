@@ -58,6 +58,9 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+/**
+ * 这一整个包都是sql相关的知识，没意思
+ */
 class BindingTest {
   private static SqlSessionFactory sqlSessionFactory;
 

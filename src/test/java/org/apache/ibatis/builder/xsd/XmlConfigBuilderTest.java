@@ -53,6 +53,10 @@ import org.junit.jupiter.api.Test;
 @Disabled("We'll try a different approach. See #1393")
 class XmlConfigBuilderTest {
 
+  /**
+   * 解析Configuration.xml
+   * 配置文件，构建Configuration
+   */
   @Test
   void shouldSuccessfullyLoadMinimalXMLConfigFile() throws Exception {
     // System.setProperty(XPathParser.KEY_USE_XSD, "true");
@@ -133,7 +137,7 @@ class XmlConfigBuilderTest {
       assertTrue(config.getTypeHandlerRegistry().getTypeHandler(String.class) instanceof CustomStringTypeHandler);
       assertTrue(config.getTypeHandlerRegistry().getTypeHandler(String.class, JdbcType.VARCHAR) instanceof CustomStringTypeHandler);
 
-      ExampleObjectFactory objectFactory = (ExampleObjectFactory)config.getObjectFactory();
+      ExampleObjectFactory objectFactory = (ExampleObjectFactory) config.getObjectFactory();
       assertEquals(1, objectFactory.getProperties().size());
       assertEquals("100", objectFactory.getProperties().getProperty("objectFactoryProperty"));
 
@@ -141,7 +145,7 @@ class XmlConfigBuilderTest {
 
       assertTrue(config.getReflectorFactory() instanceof CustomReflectorFactory);
 
-      ExamplePlugin plugin = (ExamplePlugin)config.getInterceptors().get(0);
+      ExamplePlugin plugin = (ExamplePlugin) config.getInterceptors().get(0);
       assertEquals(1, plugin.getProperties().size());
       assertEquals("100", plugin.getProperties().getProperty("pluginProperty"));
 

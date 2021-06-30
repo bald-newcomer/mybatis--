@@ -27,6 +27,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+/**
+ * 解析mapper文件
+ */
 @Disabled("We'll try a different approach. See #1393")
 class XmlMapperBuilderTest {
 

@@ -27,7 +27,6 @@ import org.apache.ibatis.builder.BuilderException;
  * Caches OGNL parsed expressions.
  *
  * @author Eduardo Macarron
- *
  * @see <a href='https://github.com/mybatis/old-google-code-issues/issues/342'>Issue 342</a>
  */
 public final class OgnlCache {
@@ -40,8 +39,13 @@ public final class OgnlCache {
     // Prevent Instantiation of Static Class
   }
 
+  /**
+   * 奇怪的知识又增加了
+   * Ogln：一种表达式解析，可以解析 #a.b.c 形式的内容
+   */
   public static Object getValue(String expression, Object root) {
     try {
+
       Map context = Ognl.createDefaultContext(root, MEMBER_ACCESS, CLASS_RESOLVER, null);
       return Ognl.getValue(parseExpression(expression), context, root);
     } catch (OgnlException e) {

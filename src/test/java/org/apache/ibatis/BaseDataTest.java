@@ -76,6 +76,7 @@ public abstract class BaseDataTest {
   }
 
   public static DataSource createBlogDataSource() throws IOException, SQLException {
+    //创建数据源，执行对应的sql脚本
     DataSource ds = createUnpooledDataSource(BLOG_PROPERTIES);
     runScript(ds, BLOG_DDL);
     runScript(ds, BLOG_DATA);

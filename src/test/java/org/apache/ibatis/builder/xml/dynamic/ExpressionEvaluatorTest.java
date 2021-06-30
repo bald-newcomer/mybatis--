@@ -24,6 +24,11 @@ import org.apache.ibatis.domain.blog.Section;
 import org.apache.ibatis.scripting.xmltags.ExpressionEvaluator;
 import org.junit.jupiter.api.Test;
 
+/**
+ * olgn 表达式的测试类
+ * <p>
+ * 能支持 一些简单的表达式
+ */
 class ExpressionEvaluatorTest {
 
   private ExpressionEvaluator evaluator = new ExpressionEvaluator();

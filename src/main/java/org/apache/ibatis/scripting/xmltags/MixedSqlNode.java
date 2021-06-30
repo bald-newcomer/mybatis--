@@ -27,6 +27,9 @@ public class MixedSqlNode implements SqlNode {
     this.contents = contents;
   }
 
+  /**
+   * 这里有个递归，多个node节点都执行他们自己的apply方法
+   */
   @Override
   public boolean apply(DynamicContext context) {
     contents.forEach(node -> node.apply(context));

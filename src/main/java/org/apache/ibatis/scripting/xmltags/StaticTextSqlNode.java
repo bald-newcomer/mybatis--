@@ -25,6 +25,9 @@ public class StaticTextSqlNode implements SqlNode {
     this.text = text;
   }
 
+  /**
+   * 只做简单的加减
+   */
   @Override
   public boolean apply(DynamicContext context) {
     context.appendSql(text);

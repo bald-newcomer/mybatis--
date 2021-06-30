@@ -44,13 +44,20 @@ import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+/**
+ * 动态sql拼接，应该是在处理sql的拼接
+ * 在真实情况下，因该是读取的myBatis配置文件中的标签，然后转变为sqlNode进行sql的拼装
+ */
 class DynamicSqlSourceTest extends BaseDataTest {
 
   @Test
   void shouldDemonstrateSimpleExpectedTextWithNoLoopsOrConditionals() throws Exception {
     final String expected = "SELECT * FROM BLOG";
+    //MixedSqlNode 混合的sqlNode ，这边只有一个TextSqlNode
     final MixedSqlNode sqlNode = mixedContents(new TextSqlNode(expected));
+    //通过sqlNode创建动态sql，里面维护一个MixedSqlNode和configuration，并且sqlNode是作为根结点的
     DynamicSqlSource source = createDynamicSqlSource(sqlNode);
+    //获取最终的BoundSql
     BoundSql boundSql = source.getBoundSql(null);
     assertEquals(expected, boundSql.getSql());
   }
@@ -59,8 +66,8 @@ class DynamicSqlSourceTest extends BaseDataTest {
   void shouldDemonstrateMultipartExpectedTextWithNoLoopsOrConditionals() throws Exception {
     final String expected = "SELECT * FROM BLOG WHERE ID = ?";
     DynamicSqlSource source = createDynamicSqlSource(
-        new TextSqlNode("SELECT * FROM BLOG"),
-        new TextSqlNode("WHERE ID = ?"));
+      new TextSqlNode("SELECT * FROM BLOG"),
+      new TextSqlNode("WHERE ID = ?"));
     BoundSql boundSql = source.getBoundSql(null);
     assertEquals(expected, boundSql.getSql());
   }
@@ -69,9 +76,12 @@ class DynamicSqlSourceTest extends BaseDataTest {
   void shouldConditionallyIncludeWhere() throws Exception {
     final String expected = "SELECT * FROM BLOG WHERE ID = ?";
     DynamicSqlSource source = createDynamicSqlSource(
-        new TextSqlNode("SELECT * FROM BLOG"),
-        new IfSqlNode(mixedContents(new TextSqlNode("WHERE ID = ?")), "true"
-        ));
+      //文本的sql节点
+      new TextSqlNode("SELECT * FROM BLOG"),
+      //条件判断的sql节点，当 第二个参数 test为true的时候，才会拼接 WHERE ID = ?
+      //test参数的识别采用 ongl 表达式 这玩意儿不想看
+      new IfSqlNode(mixedContents(new TextSqlNode("WHERE ID = ?")), "true"
+      ));
     BoundSql boundSql = source.getBoundSql(null);
     assertEquals(expected, boundSql.getSql());
   }
@@ -80,9 +90,9 @@ class DynamicSqlSourceTest extends BaseDataTest {
   void shouldConditionallyExcludeWhere() throws Exception {
     final String expected = "SELECT * FROM BLOG";
     DynamicSqlSource source = createDynamicSqlSource(
-        new TextSqlNode("SELECT * FROM BLOG"),
-        new IfSqlNode(mixedContents(new TextSqlNode("WHERE ID = ?")), "false"
-        ));
+      new TextSqlNode("SELECT * FROM BLOG"),
+      new IfSqlNode(mixedContents(new TextSqlNode("WHERE ID = ?")), "false"
+      ));
     BoundSql boundSql = source.getBoundSql(null);
     assertEquals(expected, boundSql.getSql());
   }
@@ -91,13 +101,14 @@ class DynamicSqlSourceTest extends BaseDataTest {
   void shouldConditionallyDefault() throws Exception {
     final String expected = "SELECT * FROM BLOG WHERE CATEGORY = 'DEFAULT'";
     DynamicSqlSource source = createDynamicSqlSource(
-        new TextSqlNode("SELECT * FROM BLOG"),
-        new ChooseSqlNode(new ArrayList<SqlNode>() {{
-          add(new IfSqlNode(mixedContents(new TextSqlNode("WHERE CATEGORY = ?")), "false"
-          ));
-          add(new IfSqlNode(mixedContents(new TextSqlNode("WHERE CATEGORY = 'NONE'")), "false"
-          ));
-        }}, mixedContents(new TextSqlNode("WHERE CATEGORY = 'DEFAULT'"))));
+      new TextSqlNode("SELECT * FROM BLOG"),
+      //类比与IfSqlNode，这个也是类似的意思
+      new ChooseSqlNode(new ArrayList<SqlNode>() {{
+        add(new IfSqlNode(mixedContents(new TextSqlNode("WHERE CATEGORY = ?")), "false"
+        ));
+        add(new IfSqlNode(mixedContents(new TextSqlNode("WHERE CATEGORY = 'NONE'")), "false"
+        ));
+      }}, mixedContents(new TextSqlNode("WHERE CATEGORY = 'DEFAULT'"))));
     BoundSql boundSql = source.getBoundSql(null);
     assertEquals(expected, boundSql.getSql());
   }

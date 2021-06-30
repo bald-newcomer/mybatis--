@@ -55,7 +55,7 @@ class AutoConstructorTest {
   /**
    * sqlSession.getMapper()
    * 使用 SqlSession 创建相关接口的代理对象
-   *
+   * <p>
    * 获取对应mapper过程(该过程使用了动态代理)
    * Mapper接口被到注册到了MapperRegistry中，放在其名为knowMappers 的HashMap属性中
    * 在MapperRegistry类的addMapper()方法中，knownMappers.put(type, new MapperProxyFactory<T>(type));
@@ -74,10 +74,11 @@ class AutoConstructorTest {
     }
   }
 
-
   /**
    * 报错信息：
-   * PrimitiveSubject with invalid types (int,String,int,int,int,boolean,Date) or values (2,b,10,null,45,true,Wed Jun 30 01:27:53 CST 2021).
+   * PrimitiveSubject with invalid types (int,String,int,int,int,boolean,Date)
+   * or values
+   * (2,b,10,null,45,true,Wed Jun 30 01:27:53 CST 2021).
    * <p>
    * 参数 null 不能赋值给 int类型，所以要用包装类
    * <p>
@@ -88,8 +89,6 @@ class AutoConstructorTest {
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       final AutoConstructorMapper mapper = sqlSession.getMapper(AutoConstructorMapper.class);
       assertThrows(PersistenceException.class, mapper::getSubjects);
-      //System.out.println(PersistenceException.class);
-      //System.out.println(mapper.getSubjects());
     }
   }
 

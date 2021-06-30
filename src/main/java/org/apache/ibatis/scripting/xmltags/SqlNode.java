@@ -17,6 +17,10 @@ package org.apache.ibatis.scripting.xmltags;
 
 /**
  * @author Clinton Begin
+ * <p>
+ * SqlNode接口，每种不同的策略，他们进行sql处理并且拼接的方式是不一样的
+ * <p>
+ * 他们是为了拼接sql片段为对应最后的sql语句
  */
 public interface SqlNode {
   boolean apply(DynamicContext context);

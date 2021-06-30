@@ -40,6 +40,9 @@ public class SqlSourceBuilder extends BaseBuilder {
     super(configuration);
   }
 
+  /**
+   * @param originalSql context中拼接的原始sql
+   */
   public SqlSource parse(String originalSql, Class<?> parameterType, Map<String, Object> additionalParameters) {
     ParameterMappingTokenHandler handler = new ParameterMappingTokenHandler(configuration, parameterType, additionalParameters);
     GenericTokenParser parser = new GenericTokenParser("#{", "}", handler);
@@ -47,18 +50,27 @@ public class SqlSourceBuilder extends BaseBuilder {
     if (configuration.isShrinkWhitespacesInSql()) {
       sql = parser.parse(removeExtraWhitespaces(originalSql));
     } else {
+      //大体是将  "#{ }" 使用参数进行替换
       sql = parser.parse(originalSql);
     }
     return new StaticSqlSource(configuration, sql, handler.getParameterMappings());
   }
 
+  /**
+   * 去除sql中多余的空格，只保留一个
+   */
   public static String removeExtraWhitespaces(String original) {
+
+    //StringTokenizer 按照空格拿单词
     StringTokenizer tokenizer = new StringTokenizer(original);
     StringBuilder builder = new StringBuilder();
+    //村子单词
     boolean hasMoreTokens = tokenizer.hasMoreTokens();
     while (hasMoreTokens) {
+      //获取下一个分词放到builder中
       builder.append(tokenizer.nextToken());
       hasMoreTokens = tokenizer.hasMoreTokens();
+      //词与词之间加一个空格
       if (hasMoreTokens) {
         builder.append(' ');
       }

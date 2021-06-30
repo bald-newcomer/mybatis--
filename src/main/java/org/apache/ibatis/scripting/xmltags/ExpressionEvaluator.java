@@ -25,6 +25,8 @@ import org.apache.ibatis.builder.BuilderException;
 
 /**
  * @author Clinton Begin
+ * <p>
+ * 表达式解析器，基于Ognl 不想看
  */
 public class ExpressionEvaluator {
 
