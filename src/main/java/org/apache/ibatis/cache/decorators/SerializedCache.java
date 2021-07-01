@@ -30,6 +30,8 @@ import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.io.SerialFilterChecker;
 
 /**
+ * 可序列化的缓存
+ *
  * @author Clinton Begin
  */
 public class SerializedCache implements Cache {
@@ -85,22 +87,34 @@ public class SerializedCache implements Cache {
     return delegate.equals(obj);
   }
 
+  /**
+   * 此处能看到一个简单的序列化过程
+   * 简单来讲，就是将对象输出为字节码的过程
+   */
   private byte[] serialize(Serializable value) {
-    try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(bos)) {
+    try {
+      ByteArrayOutputStream bos = new ByteArrayOutputStream();
+      ObjectOutputStream oos = new ObjectOutputStream(bos);
       oos.writeObject(value);
       oos.flush();
+      oos.close();
       return bos.toByteArray();
     } catch (Exception e) {
       throw new CacheException("Error serializing object.  Cause: " + e, e);
     }
   }
 
+
+  /**
+   * 反序列化
+   * <p>
+   * 通过对象输入流，将字节码转为真实的一个可序列化的对象
+   */
   private Serializable deserialize(byte[] value) {
     SerialFilterChecker.check();
     Serializable result;
     try (ByteArrayInputStream bis = new ByteArrayInputStream(value);
-        ObjectInputStream ois = new CustomObjectInputStream(bis)) {
+         ObjectInputStream ois = new CustomObjectInputStream(bis)) {
       result = (Serializable) ois.readObject();
     } catch (Exception e) {
       throw new CacheException("Error deserializing object.  Cause: " + e, e);

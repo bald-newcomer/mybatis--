@@ -33,13 +33,24 @@ import org.apache.ibatis.cache.CacheException;
  *
  * @author Eduardo Macarron
  *
+ * * 阻塞的缓存，在缓存中找不到数据，会一直等待，知道缓存中有数据
  */
 public class BlockingCache implements Cache {
 
   private long timeout;
+  /**
+   * 这个cache是代理实现，我们使用的真实的Cache是其实现类，因此BlockingCache不能单独的存在
+   * delegate中，一般的get、set方法都是使用的被代理的真实缓存实现，比如说PerpetualCache
+   * 但是我们会在代理的基础上加上一些功能，比如枷锁等等
+   */
   private final Cache delegate;
+  /**
+   * 锁的缓存
+   */
   private final ConcurrentHashMap<Object, CountDownLatch> locks;
-
+  /**
+   * 唯一的构造方法，也表示，其实例化需要加一个被代理的Cache
+   * */
   public BlockingCache(Cache delegate) {
     this.delegate = delegate;
     this.locks = new ConcurrentHashMap<>();
@@ -64,15 +75,18 @@ public class BlockingCache implements Cache {
     }
   }
 
-  @Override
-  public Object getObject(Object key) {
-    acquireLock(key);
-    Object value = delegate.getObject(key);
-    if (value != null) {
-      releaseLock(key);
+    /**
+     * 获取对象值，获取的时候枷锁，获取到了就释放锁，没获取到就锁住该线程
+     */
+    @Override
+    public Object getObject(Object key) {
+        acquireLock(key);
+        Object value = delegate.getObject(key);
+        if (value != null) {
+            releaseLock(key);
+        }
+        return value;
     }
-    return value;
-  }
 
   @Override
   public Object removeObject(Object key) {
@@ -86,6 +100,9 @@ public class BlockingCache implements Cache {
     delegate.clear();
   }
 
+  /**
+   * 获取锁，将锁放入缓存
+   */
   private void acquireLock(Object key) {
     CountDownLatch newLatch = new CountDownLatch(1);
     while (true) {

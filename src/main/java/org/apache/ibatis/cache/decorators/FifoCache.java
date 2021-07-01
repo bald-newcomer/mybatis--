@@ -28,6 +28,9 @@ import org.apache.ibatis.cache.Cache;
 public class FifoCache implements Cache {
 
   private final Cache delegate;
+  /**
+   * 线性队列，其本质的实现此处不看 todo
+   */
   private final Deque<Object> keyList;
   private int size;
 
@@ -73,6 +76,9 @@ public class FifoCache implements Cache {
     keyList.clear();
   }
 
+  /**
+   * 指定长度的的队列，先进先出，并且超长会将队头的元素淘汰
+   */
   private void cycleKeyList(Object key) {
     keyList.addLast(key);
     if (keyList.size() > size) {

@@ -18,6 +18,8 @@ package org.apache.ibatis.cache.decorators;
 import org.apache.ibatis.cache.Cache;
 
 /**
+ * 同步的线程池，简单粗暴的在所有的缓存上都加上了synchronized字段
+ *
  * @author Clinton Begin
  */
 public class SynchronizedCache implements Cache {

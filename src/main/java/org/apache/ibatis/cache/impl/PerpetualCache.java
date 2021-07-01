@@ -23,6 +23,8 @@ import org.apache.ibatis.cache.CacheException;
 
 /**
  * @author Clinton Begin
+ * <p>
+ * 默认缓存实现
  */
 public class PerpetualCache implements Cache {
 

@@ -25,11 +25,24 @@ import org.apache.ibatis.cache.Cache;
 /**
  * Soft Reference cache decorator
  * Thanks to Dr. Heinz Kabutz for his guidance here.
+ * <p>
+ * 软引用缓存
+ * 首先了解软引用的概念，即在内存不足的时候，这个引用内的对象将会被GC回收
+ * 引用队列：
+ * 是在 Reference 被垃圾回收的时候，会将对象的引用信息存到这个队列中
+ * <p>
+ * Deque：最新被获取到的256个对象不会被垃圾回收
  *
  * @author Clinton Begin
  */
 public class SoftCache implements Cache {
+  /**
+   * 这里还维护了一个强引用队列，最新的获取的256个对象将不会被回收
+   */
   private final Deque<Object> hardLinksToAvoidGarbageCollection;
+  /**
+   * 引用队列，这个是所有的softReference使用的，垃圾回收后的队列
+   */
   private final ReferenceQueue<Object> queueOfGarbageCollectedEntries;
   private final Cache delegate;
   private int numberOfHardLinks;
@@ -56,6 +69,10 @@ public class SoftCache implements Cache {
     this.numberOfHardLinks = size;
   }
 
+  /**
+   * 所有的value，在存储的时候都加了一层弱引用，因此在垃圾回收的时候，会将该对象回收，并且将引用的信息存储到队列中
+   * todo 至于ReferenceQueue中有什么，需要写代码去查看
+   */
   @Override
   public void putObject(Object key, Object value) {
     removeGarbageCollectedItems();
@@ -99,6 +116,14 @@ public class SoftCache implements Cache {
     delegate.clear();
   }
 
+  /**
+   * 去除垃圾集合元素
+   * poll() 投票选举是否有元素可以垃圾回收，如果有，该对象被回收，并将该对象返回
+   * 并会在缓存中将这个key对应的value去除
+   * <p>
+   * 当该引用被回收了，获取被回收的软引用的key值，在缓存中删除
+   * ps：就算不删除的花，再获取这个key对应的值，也是获取到的空值
+   */
   private void removeGarbageCollectedItems() {
     SoftEntry sv;
     while ((sv = (SoftEntry) queueOfGarbageCollectedEntries.poll()) != null) {
@@ -106,6 +131,13 @@ public class SoftCache implements Cache {
     }
   }
 
+  /**
+   * SoftReference：在内存不足的时候，将会回收所引用的对象
+   * <p>
+   * ReferenceQueue：引用队列，引用队列是引用内部的一个东西
+   * <p>
+   * 软引用entry，在软引用的基础上加个key
+   */
   private static class SoftEntry extends SoftReference<Object> {
     private final Object key;
 

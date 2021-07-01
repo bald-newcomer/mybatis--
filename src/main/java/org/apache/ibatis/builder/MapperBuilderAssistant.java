@@ -121,11 +121,18 @@ public class MapperBuilderAssistant extends BaseBuilder {
     }
   }
 
+  //通过建造这模式，对基本缓存（PerpetualCache）进行装饰，至于使用什么装饰，就看build的入参了
+  //将缓存放入configuration中，设置当前缓存为该缓存，该缓存是该命名空间，该session的缓存
   public Cache useNewCache(Class<? extends Cache> typeClass,
+      //去除元素的方式，默认为lru算法
       Class<? extends Cache> evictionClass,
+      //刷新时间间隔
       Long flushInterval,
+      //大小
       Integer size,
+      //是否可读写
       boolean readWrite,
+      //是否为阻塞的
       boolean blocking,
       Properties props) {
     Cache cache = new CacheBuilder(currentNamespace)

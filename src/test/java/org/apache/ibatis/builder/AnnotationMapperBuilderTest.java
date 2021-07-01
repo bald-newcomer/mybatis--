@@ -28,11 +28,15 @@ import org.apache.ibatis.mapping.StatementType;
 import org.apache.ibatis.session.Configuration;
 import org.junit.jupiter.api.Test;
 
+/**
+ * 基于注解的解析
+ */
 class AnnotationMapperBuilderTest {
 
   @Test
   void withOptions() {
     Configuration configuration = new Configuration();
+    //基于注解解析mapper文件，采用建造模式，此处主要看parse方法即可
     MapperAnnotationBuilder builder = new MapperAnnotationBuilder(configuration, Mapper.class);
     builder.parse();
 

@@ -26,6 +26,8 @@ import org.apache.ibatis.cache.Cache;
  * Weak Reference cache decorator.
  * Thanks to Dr. Heinz Kabutz for his guidance here.
  *
+ * 这个和软引用差不多，但是是在gc就会清除缓存了
+ *
  * @author Clinton Begin
  */
 public class WeakCache implements Cache {

@@ -20,6 +20,8 @@ import java.util.concurrent.TimeUnit;
 import org.apache.ibatis.cache.Cache;
 
 /**
+ * 拥有计划性质的缓存，此处是默认1小时清除一次的缓存
+ *
  * @author Clinton Begin
  */
 public class ScheduledCache implements Cache {
@@ -82,6 +84,9 @@ public class ScheduledCache implements Cache {
     return delegate.equals(obj);
   }
 
+  /**
+   * 当前时间 - 最后清除时间 > 清除时间间隔   -->  执行清除
+   */
   private boolean clearWhenStale() {
     if (System.currentTimeMillis() - lastClear > clearInterval) {
       clear();
