@@ -54,6 +54,7 @@ public class SimpleExecutor extends BaseExecutor {
   }
 
   @Override
+  //BaseExecutor中doQuery的实现
   public <E> List<E> doQuery(MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) throws SQLException {
     Statement stmt = null;
     try {
@@ -81,9 +82,11 @@ public class SimpleExecutor extends BaseExecutor {
     return Collections.emptyList();
   }
 
+
   private Statement prepareStatement(StatementHandler handler, Log statementLog) throws SQLException {
     Statement stmt;
     Connection connection = getConnection(statementLog);
+    //获取prepareStatement
     stmt = handler.prepare(connection, transaction.getTimeout());
     handler.parameterize(stmt);
     return stmt;

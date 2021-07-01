@@ -98,6 +98,10 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
 /**
  * @author Clinton Begin
  */
+
+/**
+ * 全局配置，解析mybatis-config文件后获得属性及数据都将在这里赋值作为全局配置
+ */
 public class Configuration {
 
   protected Environment environment;
@@ -109,7 +113,7 @@ public class Configuration {
   protected boolean multipleResultSetsEnabled = true;
   protected boolean useGeneratedKeys;
   protected boolean useColumnLabel = true;
-  protected boolean cacheEnabled = true;
+  protected boolean cacheEnabled = true;//通过设置默认值为ture设置mybatis一级缓存默认开启
   protected boolean callSettersOnNulls;
   protected boolean useActualParamName = true;
   protected boolean returnInstanceForEmptyRow;
@@ -125,7 +129,7 @@ public class Configuration {
   protected Integer defaultStatementTimeout;
   protected Integer defaultFetchSize;
   protected ResultSetType defaultResultSetType;
-  protected ExecutorType defaultExecutorType = ExecutorType.SIMPLE;
+  protected ExecutorType defaultExecutorType = ExecutorType.SIMPLE; //mybatis默认设置Simple执行器
   protected AutoMappingBehavior autoMappingBehavior = AutoMappingBehavior.PARTIAL;
   protected AutoMappingUnknownColumnBehavior autoMappingUnknownColumnBehavior = AutoMappingUnknownColumnBehavior.NONE;
 

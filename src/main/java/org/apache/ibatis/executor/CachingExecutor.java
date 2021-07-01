@@ -84,8 +84,13 @@ public class CachingExecutor implements Executor {
 
   @Override
   public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler) throws SQLException {
+    //最终输出为一个sql,但是参数为？，例如 select * from test where id=? 这里涉及到语法引擎 改写sql
+    //语法引擎改写sql不想了解。。。# $也与此有关
     BoundSql boundSql = ms.getBoundSql(parameterObject);
+    //缓存开启后通过createCacheKey创建，key=ms.getId()+rowBounds.getOffset()+rowBounds.getLimit()+boundSql.getSql()
+    //相当于缓存中创建一条sql,查询条件，查询那一页。。。
     CacheKey key = createCacheKey(ms, parameterObject, rowBounds, boundSql);
+    //继续执行query方法
     return query(ms, parameterObject, rowBounds, resultHandler, key, boundSql);
   }
 
@@ -93,7 +98,7 @@ public class CachingExecutor implements Executor {
   public <E> List<E> query(MappedStatement ms, Object parameterObject, RowBounds rowBounds, ResultHandler resultHandler, CacheKey key, BoundSql boundSql)
       throws SQLException {
     Cache cache = ms.getCache();
-    if (cache != null) {
+    if (cache != null) { //二级缓存未开启或者未设置时此时为空
       flushCacheIfRequired(ms);
       if (ms.isUseCache() && resultHandler == null) {
         ensureNoOutParams(ms, boundSql);
@@ -142,6 +147,7 @@ public class CachingExecutor implements Executor {
   }
 
   @Override
+  //实现类在BaseExecutor
   public CacheKey createCacheKey(MappedStatement ms, Object parameterObject, RowBounds rowBounds, BoundSql boundSql) {
     return delegate.createCacheKey(ms, parameterObject, rowBounds, boundSql);
   }

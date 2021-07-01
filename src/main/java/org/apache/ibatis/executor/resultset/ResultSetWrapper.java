@@ -50,15 +50,21 @@ public class ResultSetWrapper {
   private final Map<String, List<String>> mappedColumnNamesMap = new HashMap<>();
   private final Map<String, List<String>> unMappedColumnNamesMap = new HashMap<>();
 
+
   public ResultSetWrapper(ResultSet rs, Configuration configuration) throws SQLException {
     super();
     this.typeHandlerRegistry = configuration.getTypeHandlerRegistry();
     this.resultSet = rs;
+    //metaDate即对应查询数据库返回的字段信息（即查询的表字段）
     final ResultSetMetaData metaData = rs.getMetaData();
     final int columnCount = metaData.getColumnCount();
+    //同类型映射对接
     for (int i = 1; i <= columnCount; i++) {
+      //假设一次循环中返回表字段username为例
       columnNames.add(configuration.isUseColumnLabel() ? metaData.getColumnLabel(i) : metaData.getColumnName(i));
+      //返回VARCHAR 在数据库中是VARCHAR
       jdbcTypes.add(JdbcType.forCode(metaData.getColumnType(i)));
+      //返回java.lang.String 在java中是String
       classNames.add(metaData.getColumnClassName(i));
     }
   }

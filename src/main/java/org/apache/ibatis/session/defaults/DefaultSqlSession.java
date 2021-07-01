@@ -73,6 +73,7 @@ public class DefaultSqlSession implements SqlSession {
   @Override
   public <T> T selectOne(String statement, Object parameter) {
     // Popular vote was to return null on 0 results and throw exception on too many.
+    //返回结果为List,常见的查询一条数据却返回多条数据的报错即在这定义
     List<T> list = this.selectList(statement, parameter);
     if (list.size() == 1) {
       return list.get(0);
@@ -147,7 +148,9 @@ public class DefaultSqlSession implements SqlSession {
 
   private <E> List<E> selectList(String statement, Object parameter, RowBounds rowBounds, ResultHandler handler) {
     try {
+      //获取一开始从config文件中解析并赋值到全局配置的sql信息
       MappedStatement ms = configuration.getMappedStatement(statement);
+      //调用执行器的query方法，wrapCollection判断所传参数是什么类型，缓存开启中，调用缓存中query方法，即CachingExecutor中query
       return executor.query(ms, wrapCollection(parameter), rowBounds, handler);
     } catch (Exception e) {
       throw ExceptionFactory.wrapException("Error querying database.  Cause: " + e, e);

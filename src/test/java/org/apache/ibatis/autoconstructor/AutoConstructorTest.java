@@ -41,9 +41,8 @@ class AutoConstructorTest {
   static void setUp() throws Exception {
     // create a SqlSessionFactory
     try (Reader reader = Resources.getResourceAsReader("org/apache/ibatis/autoconstructor/mybatis-config.xml")) {
-
       //manage a myBatis configuration
-      //建立sqlSessionFactory，读取xml配置文件存入配置，生命周期内有效
+      //建立sqlSessionFactory，读取xml配置文件存入配置，生命周期内有效，通过build已经将数据库源以及sql语句都拿到了
       sqlSessionFactory = new SqlSessionFactoryBuilder().build(reader);
     }
 
@@ -85,7 +84,6 @@ class AutoConstructorTest {
    */
   @Test
   void primitiveSubjects() {
-
     try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
       final AutoConstructorMapper mapper = sqlSession.getMapper(AutoConstructorMapper.class);
       assertThrows(PersistenceException.class, mapper::getSubjects);
