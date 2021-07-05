@@ -39,11 +39,16 @@ public class ParameterExpression extends HashMap<String, String> {
     parse(expression);
   }
 
+  /**
+   * 解析参数表达式
+   */
   private void parse(String expression) {
     int p = skipWS(expression, 0);
+    //如果表达式以（ 为开始，则进行截取
     if (expression.charAt(p) == '(') {
       expression(expression, p + 1);
     } else {
+      //没有 （ 的地方，截取属性值
       property(expression, p);
     }
   }
@@ -59,24 +64,32 @@ public class ParameterExpression extends HashMap<String, String> {
       }
       right++;
     }
+    //截取表达式内容
     put("expression", expression.substring(left, right - 1));
+    //截取 ： 后面的jdbc类型的内容
     jdbcTypeOpt(expression, right);
   }
 
   private void property(String expression, int left) {
     if (left < expression.length()) {
+      //采用 ,: 拆分字符串，只能拆分为两段
       int right = skipUntil(expression, left, ",:");
       put("property", trimmedStr(expression, left, right));
       jdbcTypeOpt(expression, right);
     }
   }
 
+  /**
+   * todo 跳过空格，比较高效，可以学习
+   */
   private int skipWS(String expression, int p) {
     for (int i = p; i < expression.length(); i++) {
+      //不是空格，直接返回位置
       if (expression.charAt(i) > 0x20) {
         return i;
       }
     }
+    //全是空格，返回最后一个
     return expression.length();
   }
 

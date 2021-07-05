@@ -37,7 +37,9 @@ public class SqlSourceBuilderTest {
 
   @Test
   void testShrinkWhitespacesInSqlIsFalse() {
+    //采用SqlSourceBuilder中的configuration，typeAliasRegistry，typeHandlerRegistry 解析sql
     SqlSource sqlSource = sqlSourceBuilder.parse(sqlFromXml, null, null);
+    //解析完后是最中的BoundSql
     BoundSql boundSql = sqlSource.getBoundSql(null);
     String actual = boundSql.getSql();
     Assertions.assertEquals(sqlFromXml, actual);
@@ -45,9 +47,11 @@ public class SqlSourceBuilderTest {
 
   @Test
   void testShrinkWhitespacesInSqlIsTrue() {
+    //该设置会严格去除空格
     configuration.setShrinkWhitespacesInSql(true);
     SqlSource sqlSource = sqlSourceBuilder.parse(sqlFromXml, null, null);
     BoundSql boundSql = sqlSource.getBoundSql(null);
+    //在 sqlSourceBuilder 中 采用的是 StaticSqlSource 直接返回的是 sqlSourceBuilder 解析的sql 没有添加分页等信息
     String actual = boundSql.getSql();
 
     String shrankWhitespacesInSql = "SELECT * FROM user WHERE user_id = 1";

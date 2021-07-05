@@ -20,6 +20,9 @@ import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+/**
+ * 参数表达式解析，采用最原生的javaApi，可以参考
+ */
 class ParameterExpressionTest {
 
   @Test

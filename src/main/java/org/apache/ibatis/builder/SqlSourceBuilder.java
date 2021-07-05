@@ -53,6 +53,7 @@ public class SqlSourceBuilder extends BaseBuilder {
       //大体是将  "#{ }" 使用参数进行替换
       sql = parser.parse(originalSql);
     }
+    //将congfiguration、解析完的sql、参数映射存入StaticSqlSource
     return new StaticSqlSource(configuration, sql, handler.getParameterMappings());
   }
 
